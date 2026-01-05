@@ -1,7 +1,9 @@
-"use client";
+'use client';
 
 import type { Task } from '@/lib/types';
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import { useCollection, useFirebase } from '@/firebase';
+import { addDoc, collection, orderBy, query } from 'firebase/firestore';
 
 interface TaskContextType {
   tasks: Task[];
@@ -12,48 +14,21 @@ interface TaskContextType {
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
 
 export function TaskProvider({ children }: { children: ReactNode }) {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const { firestore } = useFirebase();
+  const tasksQuery = firestore ? query(collection(firestore, 'tasks'), orderBy('completedAt', 'desc')) : null;
+  const { data: tasks, loading } = useCollection<Task>(tasksQuery);
+  const isLoaded = !loading;
 
-  useEffect(() => {
-    try {
-      const item = window.localStorage.getItem('taskwise-tasks');
-      if (item) {
-        const parsedTasks = JSON.parse(item, (key, value) => {
-          if (key === 'completedAt') {
-            return new Date(value);
-          }
-          return value;
-        });
-        setTasks(parsedTasks);
-      }
-    } catch (error) {
-      console.error("Failed to load tasks from localStorage", error);
-      setTasks([]);
-    }
-    setIsLoaded(true);
-  }, []);
-
-  useEffect(() => {
-    if (isLoaded) {
-      try {
-        window.localStorage.setItem('taskwise-tasks', JSON.stringify(tasks));
-      } catch (error) {
-        console.error("Failed to save tasks to localStorage", error);
-      }
-    }
-  }, [tasks, isLoaded]);
-
-  const addTask = useCallback((task: Omit<Task, 'id' | 'completedAt'>) => {
-    const newTask: Task = {
+  const addTask = useCallback(async (task: Omit<Task, 'id' | 'completedAt'>) => {
+    if (!firestore) return;
+    const tasksCollection = collection(firestore, 'tasks');
+    await addDoc(tasksCollection, {
       ...task,
-      id: `task-${Date.now()}-${Math.random()}`,
       completedAt: new Date(),
-    };
-    setTasks(prevTasks => [newTask, ...prevTasks]);
-  }, []);
+    });
+  }, [firestore]);
 
-  const value = { tasks, addTask, isLoaded };
+  const value = { tasks: tasks || [], addTask, isLoaded };
 
   return (
     <TaskContext.Provider value={value}>

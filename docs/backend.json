@@ -1,0 +1,48 @@
+{
+  "entities": {
+    "Task": {
+      "title": "Task",
+      "description": "A task that has been completed.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the task."
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the task."
+        },
+        "attachments": {
+          "type": "string",
+          "description": "Links to any attachments for the task."
+        },
+        "completedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date and time the task was completed."
+        },
+        "zoneId": {
+          "type": "string",
+          "description": "The ID of the zone the task was completed in."
+        },
+        "personId": {
+          "type": "string",
+          "description": "The ID of the person who completed the task."
+        }
+      },
+      "required": ["name", "completedAt", "zoneId", "personId"]
+    }
+  },
+  "auth": {
+    "providers": []
+  },
+  "firestore": {
+    "/tasks/{taskId}": {
+      "schema": {
+        "$ref": "#/backend/entities/Task"
+      },
+      "description": "Collection of tasks."
+    }
+  }
+}

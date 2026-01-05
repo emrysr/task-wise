@@ -1,4 +1,5 @@
 import type { LucideIcon } from "lucide-react";
+import { Timestamp } from "firebase/firestore";
 
 export type Person = {
   id: string;
@@ -17,7 +18,7 @@ export type Task = {
   name: string;
   description: string;
   attachments: string;
-  completedAt: Date;
+  completedAt: Date | Timestamp;
   zoneId: string;
   personId: string;
 };

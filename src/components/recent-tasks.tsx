@@ -8,6 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Timestamp } from 'firebase/firestore';
+
 
 export function RecentTasks({ tasks }: { tasks: Task[] }) {
     const recentTasks = tasks.slice(0, 10);
@@ -34,6 +36,7 @@ export function RecentTasks({ tasks }: { tasks: Task[] }) {
               const zone = ZONES.find(z => z.id === task.zoneId);
               const avatar = person ? PlaceHolderImages.find(img => img.id === person.avatar) : null;
               const ZoneIcon = zone?.icon;
+              const completedAtDate = task.completedAt instanceof Timestamp ? task.completedAt.toDate() : task.completedAt;
 
               return (
                 <TableRow key={task.id}>
@@ -61,7 +64,7 @@ export function RecentTasks({ tasks }: { tasks: Task[] }) {
                     </div>
                   </TableCell>
                   <TableCell className="text-right">
-                    {format(task.completedAt, 'MMM d, yyyy')}
+                    {format(completedAtDate, 'MMM d, yyyy')}
                   </TableCell>
                 </TableRow>
               );
